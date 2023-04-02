@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slideshow</title>
+    <style>
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        form label {
+            font-weight: 600;
+        }
+
+        .file {
+            margin-top: 16px;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            overflow-x: scroll;
+            margin-top: 20em;
+            overflow-y: hidden;
+        }
+
+        .slideshow-container::-webkit-scrollbar {
+            width: 10px;
+            background-color: #ece8e8;
+            border-radius: 5px;
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .slideshow-container::-webkit-scrollbar-thumb {
+            background-color: #101010;
+            border-radius: 5px;
+        }
+
+        .photo {
+            width: 240px;
+            height: 240px;
+            margin-left: 16px;
+            margin-right: 16px;
+            transition: all .33s ease-in-out;
+            cursor: pointer;
+        }
+
+        .photo:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <form class="form">
+        <label>Upload Picture</label>
+        <input class="file" type="file">
+    </form>
+
+    <div id="app">
+
+        <div class="flex">
+            <div class="slideshow-container">
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+
+            // code here...
+
+            var Slideshow = /** @class */ (function () {
+                function Slideshow(formElement, fileElement, appElement, slideShowContainer, photos) {
+                    var _this = this;
+                    this.FormElement = formElement;
+                    this.FileElement = fileElement;
+                    this.AppElement = appElement;
+                    this.photos = photos;
+                    this.SlideShowContainer = slideShowContainer;
+                    this.FileElement.addEventListener("change", function (e) {
+                        _this.processFile(e);
+                    });
+                }
+                Slideshow.prototype.processFile = function (e) {
+                    var _this = this;
+                    var files = e === null || e === void 0 ? void 0 : e.currentTarget.files;
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        var image = document.createElement("img");
+                        var input = document.querySelector(".file");
+                        image.src = reader.result;
+                        _this.photos.push(reader.result);
+                        input.value = "";
+                        _this.render();
+                    };
+                    reader.readAsDataURL(files[0]);
+                };
+                Slideshow.prototype.render = function () {
+                    this.AppElement.innerHTML = "";
+                    this.AppElement.appendChild(this.FormElement);
+                    this.AppElement.appendChild(this.SlideShowContainer);
+                    this.SlideShowContainer.innerHTML = "";
+                    for (var i = 0; i < this.photos.length; i++) {
+                        var image = document.createElement("img");
+                        image.setAttribute("class", "photo");
+                        image.src = this.photos[i];
+                        this.SlideShowContainer.appendChild(image);
+                    }
+                    console.log("re-rendered");
+                    console.log(this);
+                };
+                return Slideshow;
+            }());
+            function main(formElement, fileElement, appElement, slideShowContainer) {
+                var photos = [];
+                var slideshow = new Slideshow(formElement, fileElement, appElement, slideShowContainer, photos);
+                slideshow.render();
+            }
+
+
+            /** @entry */
+            var app = document.getElementById("app");
+
+            /** @refs */
+            var file = document.getElementsByClassName("file")[0];
+            var slideshowContainer = document.getElementsByClassName("slideshow-container")[0];
+            var form = document.querySelector(".form");
+
+            main(form, file, app, slideshowContainer);
+        })()
+    </script>
+</body>
+
+</html>

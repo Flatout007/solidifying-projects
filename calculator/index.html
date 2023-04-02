@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        #app {
+            display: flex;
+            justify-content: center;
+            margin-top: 20em;
+        }
+
+        .container {
+            width: 20em;
+            height: 30em;
+            border: 1px solid black;
+            position: relative;
+            border-radius: 2em;
+        }
+
+        .screen {
+            width: 100%;
+            height: 5em;
+            border: 1px solid black;
+            border-top-right-radius: 2em;
+            border-top-left-radius: 2em;
+            position: relative;
+            display: flex;
+            justify-content: end;
+        }
+
+        .flex {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .buttons {
+            border: 1px solid black;
+            width: 100px;
+            height: max-content;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-row-gap: 0px;
+            padding-bottom: 16px;
+        }
+
+        .buttons button {
+            margin-top: 16px;
+            display: flex;
+            justify-content: center;
+            justify-self: center;
+            height: 20px;
+            width: 25px;
+            cursor: pointer;
+            border-radius: 0.4em;
+        }
+
+        .symbols {
+            border: 1px solid black;
+            width: 100px;
+            height: max-content;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-row-gap: 0px;
+            padding-bottom: 16px;
+        }
+
+        .symbols button {
+            margin-top: 16px;
+            display: flex;
+            justify-content: center;
+            justify-self: center;
+            height: 20px;
+            width: 25px;
+            cursor: pointer;
+            border-radius: 0.4em;
+        }
+
+        .symbols button:last-child {
+            width: 40px;
+            position: relative;
+            left: 50%;
+        }
+
+        .number {
+            position: relative;
+            font-weight: 600;
+            right: 16px;
+            font-size: 1.5rem
+        }
+    </style>
+</head>
+
+<div id="app">
+
+    <div class="container">
+        <div class="screen">
+
+            <p class="number">0</p>
+
+        </div>
+
+        <div class="flex">
+            <div class="buttons">
+
+            </div>
+
+            <div class="symbols">
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<body>
+    <script>
+
+        (function () {
+
+            // code here
+            var Calculator = /** @class */ (function () {
+                function Calculator(appElement, screenElement, buttonsElement, symbolsElement, evaluation) {
+                    var _a, _b;
+                    var _this = this;
+                    this.appElement = appElement;
+                    this.screenElement = screenElement;
+                    this.buttonsElement = buttonsElement;
+                    this.symbolsElement = symbolsElement;
+                    this.evaluation = evaluation;
+                    this.buttonsElement.addEventListener("click", function (e) {
+                        _this.handleClick(e);
+                    });
+                    this.symbolsElement.addEventListener("click", function (e) {
+                        _this.handleClick(e);
+                    });
+                    (_a = this.buttonsElement).append.apply(_a, this.createButtons());
+                    (_b = this.symbolsElement).append.apply(_b, this.createSymbols());
+                }
+                Calculator.prototype.handleClick = function (e) {
+                    var button = e.target.id;
+                    if (button !== "=" &&
+                        (button.charCodeAt(0) >= 48 && button.charCodeAt(0) <= 57)) {
+                        if (this.evaluation === "0")
+                            this.evaluation = button;
+                        else
+                            this.evaluation += button;
+                    }
+                    else if (button === "=") {
+                        this.evaluation = this.solve();
+                    }
+                    else if (button === "clear") {
+                        this.evaluation = "0";
+                    }
+                    else {
+                        this.evaluation += " ".concat(button, " ");
+                    }
+                    this.render();
+                };
+                Calculator.prototype.createButtons = function () {
+                    var buttons = [];
+                    for (var i = 0; i < 9; i++) {
+                        var element = document.createElement("button");
+                        element.innerHTML = i.toString();
+                        element.setAttribute("id", i.toString());
+                        buttons.push(element);
+                    }
+                    return buttons;
+                };
+                Calculator.prototype.createSymbols = function () {
+                    var symbols = [];
+                    var symbolsArray = ["%", "*", "+", "-", "/", "=", "clear"];
+                    for (var i = 0; i < symbolsArray.length; i++) {
+                        var element = document.createElement("button");
+                        var symbol = symbolsArray[i];
+                        element.innerHTML = symbol;
+                        element.setAttribute("id", symbol);
+                        symbols.push(element);
+                    }
+                    return symbols;
+                };
+                Calculator.prototype.solve = function () {
+                    var result = "";
+                    result = eval(this.evaluation);
+                    return result;
+                };
+                Calculator.prototype.render = function () {
+                    this.screenElement.innerHTML = "";
+                    var p = document.createElement("p");
+                    p.innerHTML = this.evaluation;
+                    p.setAttribute("class", "number");
+                    this.screenElement.appendChild(p);
+                    console.log(this);
+                };
+                return Calculator;
+            }());
+            function main(appElement, screenElement, buttonsElement, symbolsElement) {
+                var evaluation = "0";
+                var calculator = new Calculator(appElement, screenElement, buttonsElement, symbolsElement, evaluation);
+                calculator.render();
+            }
+
+            // entry point
+            var app = document.getElementById("app");
+
+            // refs
+            var buttons = document.querySelector(".buttons");
+            var symbols = document.querySelector(".symbols");
+            var screen = document.querySelector(".screen");
+
+            main(app, screen, buttons, symbols)
+        }
+        )()
+
+
+
+
+
+    </script>
+</body>
+
+</html>
