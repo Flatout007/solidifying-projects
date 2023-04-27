@@ -15,16 +15,16 @@
             display: flex;
             justify-content: center;
             margin-top: 3.5em;
-        }
-
-        .question {
-            border-bottom: 1px solid black;
+            flex-direction: column;
+            align-items: center;
         }
 
         .quiz-container {
-            border: 1px solid black;
+            border: 1px solid #408ea3;
             width: 80%;
             height: fit-content;
+            border-radius: 1em;
+            margin-top: 10em;
         }
 
         .question-text {
@@ -38,13 +38,15 @@
             display: flex;
             justify-content: start;
             position: relative;
+            color: #408ea3;
+            font-weight: 600;
         }
 
         .circle {
             border-radius: 100%;
             width: 1em;
             height: 1em;
-            border: 1px solid black;
+            border: 1px solid #408ea3;
             position: absolute;
             left: -1.5em;
             bottom: 1em;
@@ -62,7 +64,7 @@
 
         .modal {
             background-color: white;
-            border: 1px solid black;
+            border: 1px solid #408ea3;
             width: 30em;
             height: 20em;
             z-index: 200;
@@ -71,6 +73,14 @@
         .score {
             text-align: center;
             margin-bottom: 16px;
+        }
+
+        span {
+            transition: all .05s ease-in-out;
+        }
+
+        span:hover {
+            transform: scale(1.1);
         }
 
         .reset {
@@ -85,10 +95,10 @@
         }
 
         .reset:hover {
-            border: 1px solid black;
+            border: 1px solid #00000000;
         }
 
-        .submit {
+        .button {
             width: 50%;
             height: 4em;
             border-radius: 2em;
@@ -97,11 +107,20 @@
             font-weight: 600;
         }
 
-        .submit:hover {
+        .button:hover {
             transform: scale(1.1);
         }
 
         .submit-container {
+            height: 150px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+        .next-container {
             height: 150px;
             width: 100%;
             display: flex;
@@ -129,16 +148,21 @@
         <div class="quiz-container">
 
         </div>
-    </div>
 
-    <div class="submit-container">
-        <button class="submit">Submit</button>
+
+        <div class="submit-container">
+            <button class="submit button">Submit</button>
+        </div>
+
+        <div class="next-container">
+            <button class="next-button button">Next</button>
+        </div>
     </div>
 
     <script>
         (function () {
             var Quiz = /** @class */ (function () {
-                function Quiz(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, answerArray, score, questions) {
+                function Quiz(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, nextButton, answerArray, score, questions) {
                     var _this = this;
                     this.appElement = appElement;
                     this.quizContainerElement = quizContainerElement;
@@ -149,38 +173,59 @@
                     this.submitButton = submitButton;
                     this.modalElement = modalElement;
                     this.modalContainerElement = modalContainerElement;
-                    // constant renders
-                    for (var i = 0; i < this.questions.length; i++) {
-                        var question = this.questions[i];
-                        var element = this.createQuestionElement(question, i);
-                        this.quizContainerElement.appendChild(element);
-                    }
+                    this.nextButton = nextButton;
+                    this.questionIndex = 0;
+                    // on initial page load
+                    var question = this.questions[0];
+                    var questionElement = this.createQuestionElement(question, this.questionIndex);
+                    this.quizContainerElement.appendChild(questionElement);
                     this.appElement.removeChild(this.modalContainerElement);
+                    this.appElement.removeChild(this.submitButton);
                     // events
-                    document.querySelectorAll(".choices").forEach(function (ele) {
-                        ele.addEventListener("click", function (e) {
-                            _this.handleClick(e);
-                        });
-                    });
+                    this.handleChoices();
                     this.retakeButton.addEventListener("click", function () {
                         _this.retake();
                     });
                     this.submitButton.addEventListener("click", function () {
                         _this.handleScore();
                     });
+                    this.nextButton.addEventListener("click", function () {
+                        _this.handleNextQuestion(++_this.questionIndex);
+                    });
                 }
+                Quiz.prototype.handleChoices = function () {
+                    var _this = this;
+                    // add click events to the list items inside the `.choices` class
+                    document.querySelectorAll(".choices").forEach(function (ele) {
+                        ele.addEventListener("click", function (e) {
+                            _this.handleClick(e);
+                        });
+                    });
+                };
+                Quiz.prototype.handleNextQuestion = function (index) {
+                    if (index >= this.questions.length - 1) {
+                        this.appElement.replaceChild(this.submitButton, this.nextButton);
+                    }
+                    this.quizContainerElement.innerHTML = "";
+                    this.quizContainerElement.appendChild(this.createQuestionElement(this.questions[index], index));
+                    // set click events for choices after question has been added to dom
+                    this.handleChoices();
+                };
                 Quiz.prototype.retake = function () {
                     this.answerArray = [];
                     this.score = 0;
+                    this.questionIndex = 0;
                     this.modalContainerElement.style.zIndex = "-100";
                     this.appElement.removeChild(this.modalContainerElement);
-                    this.render("", 0);
+                    this.appElement.replaceChild(this.nextButton, this.submitButton);
+                    this.handleNextQuestion(this.questionIndex);
+                    this.render("");
                 };
                 Quiz.prototype.handleClick = function (e) {
                     var id = e.currentTarget.id;
                     var letter = e.target.id;
                     this.answerArray[id] = letter;
-                    this.render(letter, id);
+                    this.render(letter);
                 };
                 Quiz.prototype.handleScore = function () {
                     var _a;
@@ -194,6 +239,8 @@
                         }
                     }
                     var span = (_a = this.modalElement) === null || _a === void 0 ? void 0 : _a.querySelector("span");
+                    this.score = count;
+                    console.log(this.score);
                     score += "".concat(count, "/").concat(this.questions.length);
                     if (span) {
                         span.innerHTML = score;
@@ -210,6 +257,7 @@
                     var choicesArray = [];
                     var listElements = [];
                     var letters = [];
+                    // get values from the choices hashmap
                     for (var key in choices) {
                         choicesArray.push(choices[key]);
                         letters.push(key);
@@ -219,6 +267,7 @@
                     h3.setAttribute("class", "question-text");
                     ol.setAttribute("class", "choices");
                     h3.innerHTML = question;
+                    // assign choices to current question
                     for (var i = 0; i < choicesArray.length; i++) {
                         var choice = choicesArray[i];
                         var li = document.createElement("li");
@@ -236,32 +285,32 @@
                     div.appendChild(ol);
                     return div;
                 };
-                Quiz.prototype.render = function (letter, index) {
-                    var choices = document.querySelectorAll(".choices");
-                    if (!letter || !index) {
-                        choices.forEach(function (ele) {
-                            var children = ele.querySelectorAll("span");
-                            for (var i = 0; i < children.length; i++) {
-                                var child = children[i];
-                                child.style.backgroundColor = "white";
-                            }
-                        });
-                        return;
-                    }
-                    var children = choices[index].children;
-                    for (var i = 0; i < children.length; i++) {
-                        var child = children[i].querySelector("span");
-                        if (child.id == letter) {
-                            child.style.backgroundColor = "blue";
+                Quiz.prototype.render = function (letter) {
+                    var choices = document.querySelector(".choices");
+                    if (!letter && choices) {
+                        // if no letter is in answer key array, set all circles to transparent
+                        var children = choices.querySelectorAll("span");
+                        for (var i = 0; i < children.length; i++) {
+                            var child = children[i];
+                            child.style.backgroundColor = "#00000000";
                         }
-                        else
-                            child.style.backgroundColor = "white";
+                    }
+                    else if (letter && choices) {
+                        var children = choices.children;
+                        for (var i = 0; i < children.length; i++) {
+                            var child = children[i].querySelector("span");
+                            if (child.id === letter) {
+                                child.style.backgroundColor = "blue";
+                            }
+                            else
+                                child.style.backgroundColor = "#00000000";
+                        }
                     }
                     console.log(this);
                 };
                 return Quiz;
             }());
-            function main(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement) {
+            function main(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, nextButton) {
                 var questions = [
                     {
                         question: "When was the release date of the javascript programming language ?",
@@ -291,9 +340,10 @@
                 ];
                 var answerArray = [];
                 var score = 0;
-                var quiz = new Quiz(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, answerArray, score, questions);
-                quiz.render("", 0);
+                var quiz = new Quiz(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, nextButton, answerArray, score, questions);
+                quiz.render("");
             }
+
 
             // entry
             var app = document.getElementById("app");
@@ -301,12 +351,13 @@
             // refs
             var quizContainer = app.querySelector(".quiz-container");
             var choices = quizContainer.querySelector(".choices");
-            var submit = document.querySelector(".submit");
+            var submit = document.querySelector(".submit-container");
             var retake = document.querySelector(".reset");
             var modalContainer = document.querySelector(".modal-container");
             var modal = modalContainer.querySelector(".modal");
+            var next = document.querySelector(".next-container");
 
-            main(app, modalContainer, modal, submit, retake, quizContainer);
+            main(app, modalContainer, modal, submit, retake, quizContainer, next);
         })();
     </script>
 </body>

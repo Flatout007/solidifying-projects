@@ -13,11 +13,31 @@
         }
 
         form label {
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 1rem;
+            margin-top: 16px;
             font-weight: 600;
+            cursor: pointer;
+            width: 10em;
+            height: 2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #408ea3;
+            border-radius: 1em;
+            color:#408ea3;
+            transition: transform .1s ease-in-out;
+        }
+
+        form label:hover {
+            transform: scale(1.1);
+            font-size: 1rem !important;
+            font-weight: 600 !important;
         }
 
         .file {
-            margin-top: 16px;
+            display: none;
         }
 
         .slideshow-container {
@@ -30,6 +50,7 @@
             overflow-x: scroll;
             margin-top: 20em;
             overflow-y: hidden;
+            cursor: pointer;
         }
 
         .slideshow-container::-webkit-scrollbar {
@@ -37,11 +58,13 @@
             background-color: #ece8e8;
             border-radius: 5px;
             box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            
         }
 
         .slideshow-container::-webkit-scrollbar-thumb {
             background-color: #101010;
             border-radius: 5px;
+            
         }
 
         .photo {
@@ -62,8 +85,9 @@
 <body>
 
     <form class="form">
-        <label>Upload Picture</label>
-        <input class="file" type="file">
+        <label>Upload Picture
+            <input class="file" type="file">
+        </label>
     </form>
 
     <div id="app">

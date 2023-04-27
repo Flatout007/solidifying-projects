@@ -1,25 +1,6 @@
-interface Question {
-    choices: Record<any, string>
-    question: string,
-    answer: string
-}
-
-class Quiz {
-    public appElement: HTMLElement;
-    public quizContainerElement: HTMLElement;
-    public choicesElement: HTMLElement
-    public retakeButton: HTMLElement;
-    public scoreElement: HTMLElement;
-    public submitButton: HTMLElement;
-    public modalContainerElement: HTMLElement;
-    public modalElement: HTMLElement;
-    public nextButton: HTMLButtonElement;
-    private answerArray: Array<string>;
-    private score: number;
-    private questions: Array<any>;
-    private questionIndex: number;
-
-    constructor(appElement: HTMLElement, modalContainerElement: HTMLElement, modalElement: HTMLElement, submitButton: HTMLElement, retakeButton: HTMLElement, quizContainerElement: HTMLElement, nextButton: HTMLButtonElement, answerArray: Array<string>, score: number, questions: Array<any>) {
+var Quiz = /** @class */ (function () {
+    function Quiz(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, nextButton, answerArray, score, questions) {
+        var _this = this;
         this.appElement = appElement;
         this.quizContainerElement = quizContainerElement;
         this.answerArray = answerArray;
@@ -31,178 +12,130 @@ class Quiz {
         this.modalContainerElement = modalContainerElement;
         this.nextButton = nextButton;
         this.questionIndex = 0;
-
         // on initial page load
-        const question = this.questions[0];
-
-        const questionElement = this.createQuestionElement(question, this.questionIndex);
-
+        var question = this.questions[0];
+        var questionElement = this.createQuestionElement(question, this.questionIndex);
         this.quizContainerElement.appendChild(questionElement);
-
         this.appElement.removeChild(this.modalContainerElement);
-
         this.appElement.removeChild(this.submitButton);
-
         // events
         this.handleChoices();
-
-        this.retakeButton.addEventListener("click", (): void => {
-            this.retake();
+        this.retakeButton.addEventListener("click", function () {
+            _this.retake();
         });
-
-        this.submitButton.addEventListener("click", (): void => {
-            this.handleScore();
+        this.submitButton.addEventListener("click", function () {
+            _this.handleScore();
         });
-
-        this.nextButton.addEventListener("click", (): void => {
-            this.handleNextQuestion(++this.questionIndex);
+        this.nextButton.addEventListener("click", function () {
+            _this.handleNextQuestion(++_this.questionIndex);
         });
     }
-
-    handleChoices(): void {
+    Quiz.prototype.handleChoices = function () {
+        var _this = this;
         // add click events to the list items inside the `.choices` class
-        document.querySelectorAll(".choices").forEach((ele: any): void => {
-            ele.addEventListener("click", (e: any): void => {
-                this.handleClick(e);
+        document.querySelectorAll(".choices").forEach(function (ele) {
+            ele.addEventListener("click", function (e) {
+                _this.handleClick(e);
             });
         });
-    }
-
-    handleNextQuestion(index: number): void {
-
+    };
+    Quiz.prototype.handleNextQuestion = function (index) {
         if (index >= this.questions.length - 1) {
             this.appElement.replaceChild(this.submitButton, this.nextButton);
         }
-
         this.quizContainerElement.innerHTML = "";
-
         this.quizContainerElement.appendChild(this.createQuestionElement(this.questions[index], index));
-    
         // set click events for choices after question has been added to dom
         this.handleChoices();
-    }
-
-    retake(): void {
+    };
+    Quiz.prototype.retake = function () {
         this.answerArray = [];
         this.score = 0;
         this.questionIndex = 0;
         this.modalContainerElement.style.zIndex = "-100";
-        
         this.appElement.removeChild(this.modalContainerElement);
         this.appElement.replaceChild(this.nextButton, this.submitButton);
         this.handleNextQuestion(this.questionIndex);
         this.render("");
-    }
-
-    handleClick(e: any): void {
-        const id = e.currentTarget.id;
-        const letter = e.target.id;
-
+    };
+    Quiz.prototype.handleClick = function (e) {
+        var id = e.currentTarget.id;
+        var letter = e.target.id;
         this.answerArray[id] = letter;
-
         this.render(letter);
-    }
-
-    handleScore(): void {
-        let score = "";
-        let count = 0;
-
-        for (let i = 0; i < this.answerArray.length; i++) {
-
-            const { answer, choices } = this.questions[i];
-            const key = this.answerArray[i];
-
+    };
+    Quiz.prototype.handleScore = function () {
+        var _a;
+        var score = "";
+        var count = 0;
+        for (var i = 0; i < this.answerArray.length; i++) {
+            var _b = this.questions[i], answer = _b.answer, choices = _b.choices;
+            var key = this.answerArray[i];
             if (choices[key] === answer) {
                 count++;
             }
         }
-
-        const span = this.modalElement?.querySelector("span");
-
+        var span = (_a = this.modalElement) === null || _a === void 0 ? void 0 : _a.querySelector("span");
         this.score = count;
-
         console.log(this.score);
-
-        score += `${count}/${this.questions.length}`;
-
+        score += "".concat(count, "/").concat(this.questions.length);
         if (span) {
             span.innerHTML = score;
         }
-
         this.appElement.insertBefore(this.modalContainerElement, this.appElement.firstChild);
         this.modalContainerElement.style.zIndex = "100";
-
         window.scrollTo(0, 0);
-    }
-
-    createQuestionElement(questionObject: Question, index: number): HTMLElement {
-        const div = document.createElement("div");
-        const h3 = document.createElement("h3");
-        const ol = document.createElement("ol");
-        const { question, choices } = questionObject;
-        const choicesArray: Array<string> = [];
-        const listElements: Array<HTMLElement> = [];
-        const letters: Array<string> = [];
-
+    };
+    Quiz.prototype.createQuestionElement = function (questionObject, index) {
+        var div = document.createElement("div");
+        var h3 = document.createElement("h3");
+        var ol = document.createElement("ol");
+        var question = questionObject.question, choices = questionObject.choices;
+        var choicesArray = [];
+        var listElements = [];
+        var letters = [];
         // get values from the choices hashmap
         for (var key in choices) {
             choicesArray.push(choices[key]);
             letters.push(key);
         }
-
         div.setAttribute("class", "question");
         ol.setAttribute("id", index.toString());
         h3.setAttribute("class", "question-text");
         ol.setAttribute("class", "choices");
-
         h3.innerHTML = question;
-
         // assign choices to current question
-        for (let i = 0; i < choicesArray.length; i++) {
-            const choice = choicesArray[i];
-            const li = document.createElement("li");
-            const p = document.createElement("p");
-            const span = document.createElement("span");
-
+        for (var i = 0; i < choicesArray.length; i++) {
+            var choice = choicesArray[i];
+            var li = document.createElement("li");
+            var p = document.createElement("p");
+            var span = document.createElement("span");
             span.setAttribute("class", "circle");
             span.setAttribute("id", letters[i]);
-
             p.innerHTML = choice;
-
             li.appendChild(p);
             li.appendChild(span);
-
             listElements.push(li);
         }
-
         div.appendChild(h3);
-        ol.append(...listElements);
+        ol.append.apply(ol, listElements);
         div.appendChild(ol);
-
         return div;
-    }
-
-
-    render(letter: string): void {
-        const choices = document.querySelector(".choices");
-
+    };
+    Quiz.prototype.render = function (letter) {
+        var choices = document.querySelector(".choices");
         if (!letter && choices) {
             // if no letter is in answer key array, set all circles to transparent
-            const children = choices.querySelectorAll("span");
-
-            for (let i = 0; i < children.length; i++) {
-                const child = children[i];
-
+            var children = choices.querySelectorAll("span");
+            for (var i = 0; i < children.length; i++) {
+                var child = children[i];
                 child.style.backgroundColor = "#00000000";
             }
-        } else if (letter && choices) {
-            
-            const children = choices.children;
-
-            for (let i = 0; i < children.length; i++) {
-
-                const child: any = children[i].querySelector("span");
-
+        }
+        else if (letter && choices) {
+            var children = choices.children;
+            for (var i = 0; i < children.length; i++) {
+                var child = children[i].querySelector("span");
                 if (child.id === letter) {
                     child.style.backgroundColor = "blue";
                 }
@@ -210,14 +143,12 @@ class Quiz {
                     child.style.backgroundColor = "#00000000";
             }
         }
-
         console.log(this);
-    }
-}
-
-
-function main(appElement: HTMLElement, modalContainerElement: HTMLElement, modalElement: HTMLElement, submitButton: HTMLElement, retakeButton: HTMLElement, quizContainerElement: HTMLElement, nextButton: HTMLButtonElement): void {
-    const questions: Array<Question> = [
+    };
+    return Quiz;
+}());
+function main(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, nextButton) {
+    var questions = [
         {
             question: "When was the release date of the javascript programming language ?",
             choices: { A: "December 4, 1995", B: "December 10, 1995", C: "December 4, 2020" },
@@ -244,9 +175,8 @@ function main(appElement: HTMLElement, modalContainerElement: HTMLElement, modal
             answer: "2015"
         }
     ];
-    const answerArray = [];
-    const score = 0;
-    const quiz = new Quiz(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, nextButton, answerArray, score, questions);
-
+    var answerArray = [];
+    var score = 0;
+    var quiz = new Quiz(appElement, modalContainerElement, modalElement, submitButton, retakeButton, quizContainerElement, nextButton, answerArray, score, questions);
     quiz.render("");
 }
