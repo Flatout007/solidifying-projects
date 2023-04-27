@@ -80,7 +80,7 @@
 
     </div>
     <div>
-        <button class="new-game">start a new game</button>
+        <button class="new-game">start over</button>
     </div>
 
 
@@ -195,9 +195,8 @@
                     console.log(this);
                 };
                 TicTacToe.prototype.bindEvent = function (event, element) {
-                    var _this = this;
                     element.addEventListener(event, function () {
-                        _this.startOver();
+                        location.reload();
                     });
                 };
                 // checks if the row, col indices are in bounds or not
