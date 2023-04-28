@@ -1,5 +1,4 @@
 class TicTacToe {
-
     public newGameButton: HTMLElement;
     public board: Array<Array<any>>;
     public currentPlayer: string;
@@ -31,7 +30,6 @@ class TicTacToe {
     isWinRow(): boolean {
 
         for (let i = 0; i < this.board.length; i++) {
-
             const won = this.board[i].every((ele: string): boolean => {
                 return ele === this.currentPlayer;
             });
@@ -46,7 +44,6 @@ class TicTacToe {
     isWinColumn(): boolean {
 
         for (let i = 0; i < this.board.length; i++) {
-
             const array: Array<string> = [];
 
             for (let j = 0; j < this.board.length; j++) {
@@ -99,13 +96,20 @@ class TicTacToe {
         return false;
     }
 
-    // place the current players mark on click, and call the render method,
+    expandMark(element: HTMLElement): void {
+        element.style.animation = "fade-in .3s ease-in";
+    }
+
+    // place the current players mark on click, and calls the render method,
     // and switches the player
     handlePlayerClick(e: Event): void {
         const element = e.target as HTMLElement;
         const row = parseFloat(element.getAttribute("row") as string);
         const col = parseFloat(element.getAttribute("col") as string);
         const coordinates = [row, col];
+
+        // apply an expand animation to player mark
+        this.expandMark(element);
 
         // if the player clicks on a cell after the game has ended,
         // clear the board before clicking, and start a new game
@@ -139,13 +143,11 @@ class TicTacToe {
         }
 
         this.switchPlayer();
-
-        console.log(this);
     }
 
-    bindEvent(event: string, element: HTMLElement): void {
-        element.addEventListener(event, () => {
-            location.reload();
+    bindEvent(event: string, element: HTMLElement, method: (params?: any) => void): void {
+        element.addEventListener(event, (): void => {
+            method();
         });
     }
 
@@ -165,18 +167,13 @@ class TicTacToe {
     }
 
 
-    // renders the board as valid HTML
     render(board: Array<Array<any>>): void {
-
-        this.bindEvent("click", this.newGameButton);
 
         this.element.innerHTML = "";
 
-        // loop through the current instance of board 
         for (let i = 0; i < board.length; i++) {
 
             for (let j = 0; j < board.length; j++) {
-
                 const p = document.createElement("p");
                 const cell = document.createElement("li");
 
@@ -185,6 +182,9 @@ class TicTacToe {
                 cell.setAttribute("col", j.toString());
                 p.innerHTML = this.board[i][j];
                 cell.appendChild(p);
+
+                // add event listener to each cell
+                
 
                 // append element to entry point
                 this.element.append(cell);
@@ -216,26 +216,25 @@ class TicTacToe {
         for (let i = 0; i < this.board.length; i++) {
 
             for (let j = 0; j < this.board.length; j++) {
-
                 const p = document.createElement("p");
                 const cell = document.createElement("li");
+                const mark = this.board[i][j];
 
                 cell.setAttribute("class", "cell");
                 cell.setAttribute("row", i.toString());
                 cell.setAttribute("col", j.toString());
-                p.innerHTML = this.board[i][j];
+                p.innerHTML = mark;
                 cell.appendChild(p);
 
                 newGameBoard.append(cell);
             }
         }
 
-        this.element.parentNode?.insertBefore(newGameBoard, this.element.nextSibling);
+        this.element.parentNode?.appendChild(newGameBoard);
 
         // start new instance of tic-tac-toe
         new TicTacToe(TicTacToe.newGame(this.board.length), "X", newGameBoard, this.newGameButton, false);
     }
-
 
     static newGame(n: number): Array<Array<any>> {
         const array: Array<Array<any>> = [];
@@ -261,4 +260,8 @@ function main(element: HTMLDivElement, newGameButton: HTMLElement, n: number): v
     console.log(ticTacToe);
 
     ticTacToe.render(board);
+
+    ticTacToe.bindEvent("click", newGameButton, (): void => {
+        ticTacToe.startOver();
+    });
 }

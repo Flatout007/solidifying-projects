@@ -69,13 +69,18 @@ var TicTacToe = /** @class */ (function () {
         }
         return false;
     };
-    // place the current players mark on click, and call the render method,
+    TicTacToe.prototype.expandMark = function (element) {
+        element.style.animation = "fade-in .3s ease-in";
+    };
+    // place the current players mark on click, and calls the render method,
     // and switches the player
     TicTacToe.prototype.handlePlayerClick = function (e) {
         var element = e.target;
         var row = parseFloat(element.getAttribute("row"));
         var col = parseFloat(element.getAttribute("col"));
         var coordinates = [row, col];
+        // apply an expand animation to player mark
+        this.expandMark(element);
         // if the player clicks on a cell after the game has ended,
         // clear the board before clicking, and start a new game
         if (this.isGameEnded) {
@@ -103,11 +108,10 @@ var TicTacToe = /** @class */ (function () {
             this.startOver();
         }
         this.switchPlayer();
-        console.log(this);
     };
-    TicTacToe.prototype.bindEvent = function (event, element) {
+    TicTacToe.prototype.bindEvent = function (event, element, method) {
         element.addEventListener(event, function () {
-            location.reload();
+            method();
         });
     };
     // checks if the row, col indices are in bounds or not
@@ -121,11 +125,8 @@ var TicTacToe = /** @class */ (function () {
         }
         return true;
     };
-    // renders the board as valid HTML
     TicTacToe.prototype.render = function (board) {
-        this.bindEvent("click", this.newGameButton);
         this.element.innerHTML = "";
-        // loop through the current instance of board 
         for (var i = 0; i < board.length; i++) {
             for (var j = 0; j < board.length; j++) {
                 var p = document.createElement("p");
@@ -135,6 +136,7 @@ var TicTacToe = /** @class */ (function () {
                 cell.setAttribute("col", j.toString());
                 p.innerHTML = this.board[i][j];
                 cell.appendChild(p);
+                // add event listener to each cell
                 // append element to entry point
                 this.element.append(cell);
             }
@@ -158,15 +160,16 @@ var TicTacToe = /** @class */ (function () {
             for (var j = 0; j < this.board.length; j++) {
                 var p = document.createElement("p");
                 var cell = document.createElement("li");
+                var mark = this.board[i][j];
                 cell.setAttribute("class", "cell");
                 cell.setAttribute("row", i.toString());
                 cell.setAttribute("col", j.toString());
-                p.innerHTML = this.board[i][j];
+                p.innerHTML = mark;
                 cell.appendChild(p);
                 newGameBoard.append(cell);
             }
         }
-        (_a = this.element.parentNode) === null || _a === void 0 ? void 0 : _a.insertBefore(newGameBoard, this.element.nextSibling);
+        (_a = this.element.parentNode) === null || _a === void 0 ? void 0 : _a.appendChild(newGameBoard);
         // start new instance of tic-tac-toe
         new TicTacToe(TicTacToe.newGame(this.board.length), "X", newGameBoard, this.newGameButton, false);
     };
@@ -187,4 +190,7 @@ function main(element, newGameButton, n) {
     var ticTacToe = new TicTacToe(board, "X", element, newGameButton, false);
     console.log(ticTacToe);
     ticTacToe.render(board);
+    ticTacToe.bindEvent("click", newGameButton, function () {
+        ticTacToe.startOver();
+    });
 }
