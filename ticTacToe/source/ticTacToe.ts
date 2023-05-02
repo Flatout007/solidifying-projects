@@ -96,10 +96,6 @@ class TicTacToe {
         return false;
     }
 
-    expandMark(element: HTMLElement): void {
-        element.style.animation = "fade-in .3s ease-in";
-    }
-
     // place the current players mark on click, and calls the render method,
     // and switches the player
     handlePlayerClick(e: Event): void {
@@ -107,9 +103,6 @@ class TicTacToe {
         const row = parseFloat(element.getAttribute("row") as string);
         const col = parseFloat(element.getAttribute("col") as string);
         const coordinates = [row, col];
-
-        // apply an expand animation to player mark
-        this.expandMark(element);
 
         // if the player clicks on a cell after the game has ended,
         // clear the board before clicking, and start a new game
@@ -166,7 +159,6 @@ class TicTacToe {
         return true;
     }
 
-
     render(board: Array<Array<any>>): void {
 
         this.element.innerHTML = "";
@@ -180,14 +172,27 @@ class TicTacToe {
                 cell.setAttribute("class", "cell");
                 cell.setAttribute("row", i.toString());
                 cell.setAttribute("col", j.toString());
+                cell.setAttribute("id", `${i}${j}`);
                 p.innerHTML = this.board[i][j];
                 cell.appendChild(p);
 
-                // add event listener to each cell
-                
-
-                // append element to entry point
                 this.element.append(cell);
+
+                if (p.innerHTML === "X") {
+                    p.classList.add("X");
+                    p.classList.remove("O");
+                } else if (p.innerHTML === "O") {
+                    p.classList.remove("X")
+                    p.classList.add("O");
+                }
+
+                cell.addEventListener("click", (e: Event): void => {
+                    const element = e.target as HTMLElement;
+
+                    setTimeout((): void => {
+                        element.style.animation = "fade-in .3s ease-in";
+                    }, 0);
+                });
             }
         }
     }
@@ -199,12 +204,10 @@ class TicTacToe {
         this.board = TicTacToe.newGame(this.board.length);
 
         this.appendGameBoard();
-
-        this.removeEvent("click", this.startOver);
     }
 
-    removeEvent(event: string, method: (param?: any) => void): void {
-        this.newGameButton.removeEventListener(event, method);
+    removeEvent(element: HTMLElement, event: string, method: (param?: any) => void): void {
+        element.removeEventListener(event, method);
     }
 
     appendGameBoard(): void {
@@ -218,12 +221,11 @@ class TicTacToe {
             for (let j = 0; j < this.board.length; j++) {
                 const p = document.createElement("p");
                 const cell = document.createElement("li");
-                const mark = this.board[i][j];
 
                 cell.setAttribute("class", "cell");
                 cell.setAttribute("row", i.toString());
                 cell.setAttribute("col", j.toString());
-                p.innerHTML = mark;
+                cell.setAttribute("id", `${i}${j}`);
                 cell.appendChild(p);
 
                 newGameBoard.append(cell);
@@ -232,8 +234,9 @@ class TicTacToe {
 
         this.element.parentNode?.appendChild(newGameBoard);
 
-        // start new instance of tic-tac-toe
-        new TicTacToe(TicTacToe.newGame(this.board.length), "X", newGameBoard, this.newGameButton, false);
+        setTimeout(() => {
+            new TicTacToe(TicTacToe.newGame(this.board.length), "X", newGameBoard, this.newGameButton, false);
+        }, 100);
     }
 
     static newGame(n: number): Array<Array<any>> {
@@ -254,7 +257,6 @@ class TicTacToe {
 
 function main(element: HTMLDivElement, newGameButton: HTMLElement, n: number): void {
     const board = TicTacToe.newGame(n);
-
     const ticTacToe = new TicTacToe(board, "X", element, newGameButton, false);
 
     console.log(ticTacToe);

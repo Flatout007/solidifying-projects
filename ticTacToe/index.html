@@ -47,13 +47,15 @@
             position: relative;
             margin-top: 16px;
             margin-bottom: 16px;
+            animation: fade-in .3s ease-in-out;
         }
 
         .cell {
             list-style: none;
-            border: 1px solid black;
+            border: 1px solid green;
             cursor: pointer;
             position: relative;
+            background-color: rgba(127, 255, 212, 0.034);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -66,6 +68,42 @@
 
         .cell p {
             position: absolute;
+        }
+
+        .cell:nth-child(1) {
+            border-left: none;
+            border-top: none;
+        }
+
+        .cell:nth-child(4) {
+            border-left: none;
+        }
+
+        .cell:nth-child(7) {
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .cell:nth-child(2) {
+            border-top: none;
+        }
+
+        .cell:nth-child(3) {
+            border-top: none;
+            border-right: none;
+        }
+
+        .cell:nth-child(6) {
+            border-right: none;
+        }
+
+        .cell:nth-child(8) {
+            border-bottom: none;
+        }
+
+        .cell:nth-child(9) {
+            border-right: none;
+            border-bottom: none;
         }
 
         .new-game {
@@ -87,6 +125,14 @@
         .new-game:hover {
             transform: scale(1.05);
         }
+
+        .X {
+            color: green;
+        }
+
+        .O {
+            color: red;
+        }
     </style>
 </head>
 
@@ -100,7 +146,6 @@
     <div>
         <button class="new-game">new board</button>
     </div>
-
 
     <script>
         (function () {
@@ -176,9 +221,6 @@
                     }
                     return false;
                 };
-                TicTacToe.prototype.expandMark = function (element) {
-                    element.style.animation = "fade-in .3s ease-in";
-                };
                 // place the current players mark on click, and calls the render method,
                 // and switches the player
                 TicTacToe.prototype.handlePlayerClick = function (e) {
@@ -186,8 +228,6 @@
                     var row = parseFloat(element.getAttribute("row"));
                     var col = parseFloat(element.getAttribute("col"));
                     var coordinates = [row, col];
-                    // apply an expand animation to player mark
-                    this.expandMark(element);
                     // if the player clicks on a cell after the game has ended,
                     // clear the board before clicking, and start a new game
                     if (this.isGameEnded) {
@@ -241,11 +281,24 @@
                             cell.setAttribute("class", "cell");
                             cell.setAttribute("row", i.toString());
                             cell.setAttribute("col", j.toString());
+                            cell.setAttribute("id", "".concat(i).concat(j));
                             p.innerHTML = this.board[i][j];
                             cell.appendChild(p);
-                            // add event listener to each cell
-                            // append element to entry point
                             this.element.append(cell);
+                            if (p.innerHTML === "X") {
+                                p.classList.add("X");
+                                p.classList.remove("O");
+                            }
+                            else if (p.innerHTML === "O") {
+                                p.classList.remove("X");
+                                p.classList.add("O");
+                            }
+                            cell.addEventListener("click", function (e) {
+                                var element = e.target;
+                                setTimeout(function () {
+                                    element.style.animation = "fade-in .3s ease-in";
+                                }, 0);
+                            });
                         }
                     }
                 };
@@ -253,12 +306,12 @@
                     this.isGameEnded = true;
                     this.board = TicTacToe.newGame(this.board.length);
                     this.appendGameBoard();
-                    this.removeEvent("click", this.startOver);
                 };
-                TicTacToe.prototype.removeEvent = function (event, method) {
-                    this.newGameButton.removeEventListener(event, method);
+                TicTacToe.prototype.removeEvent = function (element, event, method) {
+                    element.removeEventListener(event, method);
                 };
                 TicTacToe.prototype.appendGameBoard = function () {
+                    var _this = this;
                     var _a;
                     var newGameBoard = document.createElement("div");
                     newGameBoard.classList.add("game-container");
@@ -267,18 +320,18 @@
                         for (var j = 0; j < this.board.length; j++) {
                             var p = document.createElement("p");
                             var cell = document.createElement("li");
-                            var mark = this.board[i][j];
                             cell.setAttribute("class", "cell");
                             cell.setAttribute("row", i.toString());
                             cell.setAttribute("col", j.toString());
-                            p.innerHTML = mark;
+                            cell.setAttribute("id", "".concat(i).concat(j));
                             cell.appendChild(p);
                             newGameBoard.append(cell);
                         }
                     }
                     (_a = this.element.parentNode) === null || _a === void 0 ? void 0 : _a.appendChild(newGameBoard);
-                    // start new instance of tic-tac-toe
-                    new TicTacToe(TicTacToe.newGame(this.board.length), "X", newGameBoard, this.newGameButton, false);
+                    setTimeout(function () {
+                        new TicTacToe(TicTacToe.newGame(_this.board.length), "X", newGameBoard, _this.newGameButton, false);
+                    }, 100);
                 };
                 TicTacToe.newGame = function (n) {
                     var array = [];
@@ -301,7 +354,6 @@
                     ticTacToe.startOver();
                 });
             }
-
 
             // entry point! Do not remove!
             var app = document.querySelector(".game-container");
