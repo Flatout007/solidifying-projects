@@ -74,10 +74,18 @@ class Quiz {
             this.appElement.replaceChild(this.submitButton, this.nextButton);
         }
 
+        const questionElement = this.createQuestionElement(this.questions[index], index)
+
+        this.appElement.innerHTML = "";
+
         this.quizContainerElement.innerHTML = "";
 
-        this.quizContainerElement.appendChild(this.createQuestionElement(this.questions[index], index));
+        this.quizContainerElement.appendChild(questionElement);
     
+        this.appElement.appendChild(this.quizContainerElement);
+
+        this.appElement.appendChild(this.nextButton);
+
         // set click events for choices after question has been added to dom
         this.handleChoices();
     }
